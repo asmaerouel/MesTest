@@ -1,6 +1,6 @@
 $password = "TP2026"
 
-$folder = "\Desktop\tp-simulation"
+$folder = "\tp-simulation"
 
 # --- CREATION CLE AES ---
 
