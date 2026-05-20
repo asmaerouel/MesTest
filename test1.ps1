@@ -1,5 +1,5 @@
 $password = "TP2026"
-$folder = "$env:USERPROFILE\tp-simulation"
+$folder = "\tp-simulation"
 
 # --- CREATION CLE AES ---
 $sha = New-Object System.Security.Cryptography.SHA256Managed
