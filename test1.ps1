@@ -76,6 +76,33 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command"
     -Name "(Default)" `
     -Value "powershell.exe -WindowStyle Hidden -File `"$folder\open_enc.ps1`""
 
+
+New-Item -Path "HKCU:\Software\Classes\.enc" -Force | Out-Null
+Set-ItemProperty -Path "HKCU:\Software\Classes\.enc" -Name "(Default)" -Value "EncryptedFile"
+
+New-Item -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" -Force | Out-Null
+Set-ItemProperty -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" `
+    -Name "(Default)" `
+    -Value "powershell.exe -WindowStyle Hidden -File `"$folder\open_enc.ps1`""
+
+# Notifier Windows du changement d'association
+$source = @"
+using System;
+using System.Runtime.InteropServices;
+public class WinAPI {
+    [DllImport("shell32.dll")]
+    public static extern void SHChangeNotify(int wEventId, int uFlags, IntPtr dwItem1, IntPtr dwItem2);
+}
+"@
+Add-Type -TypeDefinition $source
+[WinAPI]::SHChangeNotify(0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
+
+Write-Host "Association .enc configuree (popup au double-clic)"
+
+
+
+
+
 Write-Host "Association .enc configuree (popup au double-clic)"
 Write-Host ""
 Write-Host "Tous les fichiers sont chiffres."
