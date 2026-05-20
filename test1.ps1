@@ -22,7 +22,7 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\.enc" -Name "(Default)" -Value "E
 New-Item -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" `
     -Name "(Default)" `
-    -Value "powershell.exe -WindowStyle Hidden -File `"$folder\open_enc.ps1`""
+    -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$folder\open_enc.ps1`""
 
 $source = @"
 using System;
