@@ -41,8 +41,17 @@ $graphics.Clear([System.Drawing.Color]::Black)
 # Tete de mort en grand
 $font = New-Object System.Drawing.Font("Segoe UI Emoji", 300)
 $brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::Red)
-$graphics.DrawString("💀", $font, $brush, 450, 100)
+$skull = @"
+   ___
+  /   \
+ | o o |
+  \ ^ /
+   |||||
+   |||||
+"@
 
+$fontSkull = New-Object System.Drawing.Font("Consolas", 80, [System.Drawing.FontStyle]::Bold)
+$graphics.DrawString($skull, $fontSkull, $brush, 600, 50)
 # Texte ransomware
 $fontText = New-Object System.Drawing.Font("Consolas", 40, [System.Drawing.FontStyle]::Bold)
 $graphics.DrawString("VOS FICHIERS ONT ETE CHIFFRES", $fontText, $brush, 350, 800)
