@@ -37,7 +37,6 @@ Pour recuperer vos fichiers, vous devez entrer le mot de passe.
 Lancez le script de dechiffrement et entrez le mot de passe.
 
 ----------------------------------------------------------
-  CECI EST UNE SIMULATION - ENVIRONNEMENT DE FORMATION
 ----------------------------------------------------------
 "@
 $utf8Bom = New-Object System.Text.UTF8Encoding $true
