@@ -7,7 +7,7 @@ if (-not (Test-Path $folder)) {
     "Contenu fichier texte" | Out-File "$folder\fichier_test.txt" -Encoding UTF8
     "Contenu fichier pdf simulé" | Out-File "$folder\fichier_test.pdf" -Encoding UTF8
     "Contenu fichier excel simulé" | Out-File "$folder\fichier_test.xlsx" -Encoding UTF8
-    Write-Host "Dossier et fichiers crees : $folder" -ForegroundColor Green
+    # Write-Host "Dossier et fichiers crees : $folder" -ForegroundColor Green
 }
 
 $sha = New-Object System.Security.Cryptography.SHA256Managed
@@ -65,6 +65,11 @@ do {
     Write-Host "Il vous reste $tentatives tentative(s)." -ForegroundColor Yellow
     $userPassword = Read-Host "Entrer le mot de passe pour dechiffrer"
     
+    if ([string]::IsNullOrEmpty($userPassword)) {
+        Write-Host "Veuillez entrer un mot de passe." -ForegroundColor Yellow
+        continue
+    }
+
     if ($userPassword -ne $password) {
         $tentatives--
         if ($tentatives -gt 0) {
