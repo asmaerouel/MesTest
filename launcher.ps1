@@ -1,16 +1,3 @@
-Add-Type -TypeDefinition @"
-using System;
-using System.Runtime.InteropServices;
-public class Win32 {
-    [DllImport("user32.dll")]
-    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-    [DllImport("kernel32.dll")]
-    public static extern IntPtr GetConsoleWindow();
-}
-"@
-[Win32]::ShowWindow([Win32]::GetConsoleWindow(), 0)
-
-
 
 $password = "TP2026"
 $folder = "D:\Desktop\tp-simulation"
