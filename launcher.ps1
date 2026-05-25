@@ -67,6 +67,7 @@ public class Wallpaper {
 [Wallpaper]::SystemParametersInfo(20, 0, $wallpaperPath, 3)
 
 
+Start-Sleep -Seconds 2
 
 
 # --- FENETRE RANSOMWARE ---
