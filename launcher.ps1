@@ -1,6 +1,6 @@
 
 $password = "TP2026"
-$folder = "D:\Desktop\tp-simulation"
+$folder = "C:\tp-simulation"
 
 # --- VERIFICATION / CREATION DOSSIER ---
 if (-not (Test-Path $folder)) {
